@@ -115,6 +115,7 @@ function find(){
  const terms=(aliases[raw]||aliases[compact]||words).filter(Boolean);
  const consoleIntent=/^(play ?station|ps ?[45]|xbox|nintendo|nintendo switch|switch)$/i.test(raw);
  const laptopIntent=/^(laptop|notebook|laptopuri|notebookuri)$/i.test(raw);
+ const iphoneIntent=/^iphone$/i.test(raw);
  const tvIntent=/(^|\s)(tv|televizor|television)(\s|$)/i.test(raw);
  const wantsSamsung=/(^|\s)samsung(\s|$)/i.test(raw);
 
@@ -123,45 +124,62 @@ function find(){
  const accessoryRE=/\b(ventaris|controller|controler|gamepad|volan|pedal|pedale|thrustmaster|husa|case|cablu|cable|incarcator|charger|suport|stand|folie|casti|headset|skin|adaptor|adapter|dock|baterie|remote|telecomanda|mount|rucsac|geanta|cooler|lampa)\b/i;
  const gameRE=/\b(joc|game|games|rush of blood|hogwarts|lego|fifa|fc 2[0-9]|call of duty|spider-man|spiderman|ninjago|undercover)\b/i;
  const laptopRE=/\b(laptop|notebook)\b/i;
- const laptopAccessoryRE=/\b(husa|case|rucsac|geanta|cooler|stand|suport|lampa|incarcator|charger|baterie|dock|adaptor|adapter|mouse|tastatura|keyboard)\b/i;
- const tvRE=/\b(tv|televizor|television|smart tv|qled|oled|neo qled)\b/i;
- const tvAccessoryRE=/\b(telecomanda|remote|wall mount|suport|stand|husa|cablu|cable|adaptor|adapter)\b/i;
+ const laptopAccessoryRE=/\b(husa|case|rucsac|geanta|cooler|stand|suport|lampa|incarcator|charger|baterie|dock|adaptor|adapter|mouse|tastatura|keyboard|sleeve|skin|folie|lock|antifurt|casti|headset)\b/i;
+ const tvRE=/\b(tv|televizor|television|smart tv|qled|oled|neo qled|mini led|led tv)\b/i;
+ const tvAccessoryRE=/\b(telecomanda|remote|wall mount|suport|stand|husa|cablu|cable|adaptor|adapter|rama|frame)\b/i;
+ const iphoneAccessoryRE=/\b(husa|case|folie|sticla|glass|cablu|cable|incarcator|charger|adaptor|adapter|suport|stand|baterie|battery|dock|carcasa|protectie|protector|skin|bumper|casti|headset|holder)\b/i;
+ const iphoneModelRE=/\biphone\s*(se|x|xr|xs|11|12|13|14|15|16|17)(\s|$|pro|plus|mini|max)/i;
+
+ const titleMatches=p=>{
+   const t=norm(p.title);
+   if(raw.length>2 && t.includes(raw)) return true;
+   return terms.some(x=>t.includes(x));
+ };
+ const initial=products.filter(titleMatches);
+
+ // PRICE SANITY: use the expensive end of matching products as a clue to what the
+ // main product costs. Very cheap matches are probably accessories, not the item.
+ const prices=initial.map(p=>Number(p.price)).filter(x=>Number.isFinite(x)&&x>0).sort((a,b)=>a-b);
+ const q75=prices.length ? prices[Math.floor((prices.length-1)*0.75)] : 0;
+ const cheapCut=q75 ? q75*0.12 : 0;
+
+ const isMainProduct=p=>{
+   const t=norm(p.title), price=Number(p.price)||0;
+   if(laptopIntent) return laptopRE.test(t) && !laptopAccessoryRE.test(t) && (!cheapCut || price>=cheapCut);
+   if(tvIntent) return tvRE.test(t) && !tvAccessoryRE.test(t) && (!wantsSamsung || /\bsamsung\b/i.test(t)) && (!cheapCut || price>=cheapCut);
+   if(iphoneIntent) return /\biphone\b/i.test(t) && iphoneModelRE.test(t) && !iphoneAccessoryRE.test(t) && (!cheapCut || price>=cheapCut);
+   if(consoleIntent){
+     if(/^nintendo|^switch/i.test(raw)) return /\b(nintendo|switch)\b/i.test(t) && !gameRE.test(t) && !accessoryRE.test(t) && (!cheapCut || price>=cheapCut);
+     if(/play ?station|ps ?[45]/i.test(raw)) return /\b(playstation|ps5|ps4)\b/i.test(t) && !gameRE.test(t) && !accessoryRE.test(t) && (!cheapCut || price>=cheapCut);
+     if(/xbox/i.test(raw)) return /\bxbox\b/i.test(t) && !gameRE.test(t) && !accessoryRE.test(t) && (!cheapCut || price>=cheapCut);
+   }
+   return true;
+ };
 
  const score=p=>{
-   const t=norm(p.title), b=blob(p); let s=0;
+   const t=norm(p.title), b=blob(p), price=Number(p.price)||0; let s=0;
    if(t===raw)s+=120;
    if(raw.length>2&&t.includes(raw))s+=45;
    for(const x of terms){if(t.includes(x))s+=14;else if(b.includes(x))s+=3}
    const hits=words.filter(x=>t.includes(x)).length;
    if(words.length>1&&hits===words.length)s+=35;
-
-   if(consoleIntent){
-     if(consoleRE.test(t)&&consoleBrandRE.test(t))s+=190;
-     else if(consoleBrandRE.test(t))s+=25;
-     if(accessoryRE.test(t))s-=130;
-     if(gameRE.test(t))s-=150;
-     if(/\b(pentru|compatibil|compatible)\b/i.test(t)&&!consoleRE.test(t))s-=70;
-   }
-   if(laptopIntent){
-     if(laptopRE.test(t)&&!laptopAccessoryRE.test(t))s+=200;
-     if(laptopAccessoryRE.test(t))s-=170;
-     if(!laptopRE.test(t))s-=45;
-   }
-   if(tvIntent){
-     if(tvRE.test(t)&&!tvAccessoryRE.test(t))s+=200;
-     if(tvAccessoryRE.test(t))s-=180;
-     if(wantsSamsung){if(/\bsamsung\b/i.test(t))s+=90;else s-=70}
-   }
+   if(isMainProduct(p))s+=300;
+   if(cheapCut && price<cheapCut)s-=180;
    return s;
  };
 
- let r=products.map(p=>({p,s:score(p)})).filter(x=>x.s>0);
+ let r=initial.map(p=>({p,s:score(p)}));
+ // For clear product searches, do not fill empty slots with unrelated junk.
+ if(consoleIntent||laptopIntent||tvIntent||iphoneIntent){
+   const main=r.filter(x=>isMainProduct(x.p));
+   if(main.length) r=main;
+ }
  const seen=new Set();
  r=r.filter(x=>{const k=norm(x.p.title).replace(/[^a-z0-9]+/g," ").trim();if(seen.has(k))return false;seen.add(k);return true});
- if(state.poison==="cheapest") r.sort((a,b)=>{
-   const intent=x=>consoleIntent?(consoleRE.test(norm(x.p.title))&&consoleBrandRE.test(norm(x.p.title))):laptopIntent?(laptopRE.test(norm(x.p.title))&&!laptopAccessoryRE.test(norm(x.p.title))):tvIntent?(tvRE.test(norm(x.p.title))&&!tvAccessoryRE.test(norm(x.p.title))):true;
-   const ai=intent(a),bi=intent(b); if(ai!==bi)return bi-ai; return a.p.price-b.p.price;
- });
+
+ // Best Deal: relevance first, then cheapest real offer. Cheapest: pure price order
+ // inside the products that passed the "actual product" test above.
+ if(state.poison==="cheapest") r.sort((a,b)=>a.p.price-b.p.price||b.s-a.s);
  else r.sort((a,b)=>b.s-a.s||a.p.price-b.p.price);
  return r.slice(0,10).map(x=>x.p)
 }
