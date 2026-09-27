@@ -76,7 +76,13 @@ h2{font-size:24px;margin:19px 4px 8px}p.help{color:#b8bec9;margin:0 4px 22px;fon
 </div></section>
 </div>
 <script>
-const products = [];
+let products = [];
+let productsLoaded = false;
+let productsLoadError = null;
+const productsReady = fetch("products.json", {cache:"no-store"})
+  .then(r=>{if(!r.ok) throw new Error(`products.json HTTP ${r.status}`); return r.json()})
+  .then(data=>{products = Array.isArray(data) ? data : (Array.isArray(data.products) ? data.products : []); productsLoaded=true; return products;})
+  .catch(err=>{productsLoadError=err; productsLoaded=true; console.error("UGLY product feed failed to load:",err); return products;});
 
 let state={q:"headphones",condition:"new",poison:"best"};
 function show(id){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("on"));document.getElementById(id).classList.add("on");window.scrollTo(0,0)}
@@ -112,5 +118,5 @@ function find(){
  return r.slice(0,10)
 }
 function ron(v){return new Intl.NumberFormat("ro-RO",{minimumFractionDigits:2,maximumFractionDigits:2}).format(v)+" RON"}
-document.getElementById("searchNow").onclick=()=>{let r=find();document.getElementById("scribble").textContent=state.q;let pp=document.getElementById("poisonPill");pp.textContent=state.poison==="cheapest"?"💰 CHEAPEST":state.poison==="fastest"?"ϟ FASTEST":"🔥 BEST DEAL";document.getElementById("list").innerHTML=r.length?r.map((p,i)=>`<article class="product"><div class="rank">#${i+1}</div><img src="${p.image}" alt=""><div><div class="ptitle">${p.title}</div><div class="merchant">${p.merchant || "Merchant"} · NEW</div><div class="price">${ron(p.price)}</div><a class="deal" href="${p.link}" target="_blank" rel="nofollow sponsored noopener">View Deal →</a></div></article>`).join(""):`<article class="product"><div><div class="ptitle">No real deals found for “${state.q}”.</div><div class="merchant">Try another product or edit your search.</div></div></article>`;document.getElementById("truth").textContent=state.poison==="fastest"?"Delivery-time information is not supplied by the current product feed, so UGLY does not invent delivery rankings. Products are shown using the available real feed data.":"Live UGLY prototype searching real affiliate products from multiple Romanian merchants. Retailer price and availability may change.";show("results")};
+document.getElementById("searchNow").onclick=async()=>{await productsReady;let r=find();document.getElementById("scribble").textContent=state.q;let pp=document.getElementById("poisonPill");pp.textContent=state.poison==="cheapest"?"💰 CHEAPEST":state.poison==="fastest"?"ϟ FASTEST":"🔥 BEST DEAL";document.getElementById("list").innerHTML=r.length?r.map((p,i)=>`<article class="product"><div class="rank">#${i+1}</div><img src="${p.image}" alt=""><div><div class="ptitle">${p.title}</div><div class="merchant">${p.merchant || "Merchant"} · NEW</div><div class="price">${ron(p.price)}</div><a class="deal" href="${p.link}" target="_blank" rel="nofollow sponsored noopener">View Deal →</a></div></article>`).join(""):`<article class="product"><div><div class="ptitle">No real deals found for “${state.q}”.</div><div class="merchant">Try another product or edit your search.</div></div></article>`;document.getElementById("truth").textContent=state.poison==="fastest"?"Delivery-time information is not supplied by the current product feed, so UGLY does not invent delivery rankings. Products are shown using the available real feed data.":"Live UGLY prototype searching real affiliate products from multiple Romanian merchants. Retailer price and availability may change.";show("results")};
 </script></body></html>
