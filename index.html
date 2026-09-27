@@ -77,18 +77,30 @@ h2{font-size:24px;margin:19px 4px 8px}p.help{color:#b8bec9;margin:0 4px 22px;fon
 </div>
 <script>
 let products = [];
-let productsLoaded = false;
+let productsLoaded = true;
 let productsLoadError = null;
-const productsReady = Promise.all([
-  fetch("products-1.json", {cache:"no-store"}),
-  fetch("products-2.json", {cache:"no-store"})
-])
-  .then(async responses => {
-    for (const r of responses) if (!r.ok) throw new Error(`${r.url} HTTP ${r.status}`);
-    return (await Promise.all(responses.map(r => r.json()))).flat();
-  })
-  .then(data=>{products = data; productsLoaded=true; return products;})
-  .catch(err=>{productsLoadError=err; productsLoaded=true; console.error("UGLY product feed failed:", err); return [];});
+
+// UGLY -> Typesense Cloud. This is a SEARCH-ONLY key restricted to ugly_products.
+const TYPESENSE_HOST = "oe9xbd8j3sa1fulqp-1.a1.typesense.net";
+const TYPESENSE_SEARCH_KEY = "MpiBOVGFxQMmh4sjabpjUnLZSvNqtnpM";
+const TYPESENSE_COLLECTION = "ugly_products";
+
+async function loadFromTypesense(query){
+  const q=(query||"*").trim()||"*";
+  const params=new URLSearchParams({
+    q,
+    query_by:"title",
+    per_page:"100",
+    prefix:"true",
+    typo_tokens_threshold:"1"
+  });
+  const url=`https://${TYPESENSE_HOST}/collections/${TYPESENSE_COLLECTION}/documents/search?${params}`;
+  const r=await fetch(url,{headers:{"X-TYPESENSE-API-KEY":TYPESENSE_SEARCH_KEY},cache:"no-store"});
+  if(!r.ok) throw new Error(`Typesense HTTP ${r.status}: ${await r.text()}`);
+  const data=await r.json();
+  products=(data.hits||[]).map(h=>h.document);
+  return products;
+}
 
 let state={q:"headphones",condition:"new",poison:"best"};
 function show(id){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("on"));document.getElementById(id).classList.add("on");window.scrollTo(0,0)}
@@ -187,5 +199,26 @@ function find(){
  return r.slice(0,10).map(x=>x.p)
 }
 function ron(v){return new Intl.NumberFormat("ro-RO",{minimumFractionDigits:2,maximumFractionDigits:2}).format(v)+" RON"}
-document.getElementById("searchNow").onclick=async()=>{await productsReady;let r=find();document.getElementById("scribble").textContent=state.q;let pp=document.getElementById("poisonPill");pp.textContent=state.poison==="cheapest"?"💰 CHEAPEST":state.poison==="fastest"?"ϟ FASTEST":"🔥 BEST DEAL";document.getElementById("list").innerHTML=r.length?r.map((p,i)=>`<article class="product"><div class="rank">#${i+1}</div><img src="${p.image}" alt=""><div><div class="ptitle">${p.title}</div><div class="merchant">${p.merchant || "Merchant"} · NEW</div><div class="price">${ron(p.price)}</div><a class="deal" href="${p.link}" target="_blank" rel="nofollow sponsored noopener">View Deal →</a></div></article>`).join(""):`<article class="product"><div><div class="ptitle">No real deals found for “${state.q}”.</div><div class="merchant">Try another product or edit your search.</div></div></article>`;document.getElementById("truth").textContent=state.poison==="fastest"?"Delivery-time information is not supplied by the current product feed, so UGLY does not invent delivery rankings. Products are shown using the available real feed data.":"Live UGLY prototype searching real affiliate products from multiple Romanian merchants. Retailer price and availability may change.";show("results")};
+document.getElementById("searchNow").onclick=async()=>{
+  const list=document.getElementById("list");
+  list.innerHTML=`<article class="product"><div><div class="ptitle">UGLY is searching…</div><div class="merchant">Checking Typesense</div></div></article>`;
+  document.getElementById("scribble").textContent=state.q;
+  show("results");
+  try{
+    await loadFromTypesense(state.q);
+    let r=find();
+    let pp=document.getElementById("poisonPill");
+    pp.textContent=state.poison==="cheapest"?"💰 CHEAPEST":state.poison==="fastest"?"ϟ FASTEST":"🔥 BEST DEAL";
+    list.innerHTML=r.length?r.map((p,i)=>{
+      const image=p.image?`<img src="${p.image}" alt="">`:``;
+      const deal=p.link?`<a class="deal" href="${p.link}" target="_blank" rel="nofollow sponsored noopener">View Deal →</a>`:``;
+      return `<article class="product"><div class="rank">#${i+1}</div>${image}<div><div class="ptitle">${p.title}</div><div class="merchant">${p.merchant || "Merchant"} · NEW</div><div class="price">${ron(Number(p.price)||0)}</div>${deal}</div></article>`;
+    }).join(""):`<article class="product"><div><div class="ptitle">No real deals found for “${state.q}”.</div><div class="merchant">Try another product or edit your search.</div></div></article>`;
+    document.getElementById("truth").textContent=state.poison==="fastest"?"Delivery-time information is not supplied by the current product feed, so UGLY does not invent delivery rankings. Products are shown using the available real feed data.":"UGLY search is now powered by Typesense. Retailer price and availability may change.";
+  }catch(err){
+    console.error("UGLY Typesense search failed:",err);
+    list.innerHTML=`<article class="product"><div><div class="ptitle">Search connection failed.</div><div class="merchant">UGLY could not reach Typesense. Open DevTools → Console for the exact error.</div></div></article>`;
+    document.getElementById("truth").textContent="Typesense connection error.";
+  }
+};
 </script></body></html>
