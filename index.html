@@ -106,20 +106,28 @@ function find(){
  const raw=norm(state.q).trim(), compact=raw.replace(/\s+/g,"");
  const aliases={"playstation":["playstation","ps5","ps4"],"play station":["playstation","ps5","ps4"],"xbox":["xbox"],"iphone":["iphone"]};
  const terms=(aliases[raw]||aliases[compact]||raw.split(/\s+/)).filter(Boolean);
- const consoleRE=/\b(consola|console|playstation 5|playstation 4|ps5|ps4|xbox series|xbox one)\b/i;
- const gameRE=/\b(joc|game|games|pentru playstation|pentru ps4|pentru ps5)\b/i;
- const accessoryRE=/\b(husa|case|cablu|cable|incarcator|charger|suport|stand|folie|controller|gamepad|casti|headset|skin|adaptor|adapter)\b/i;
  const wantsConsole=["playstation","play station","ps5","ps4","xbox"].includes(raw)||["playstation","ps5","ps4","xbox"].includes(compact);
+ const realConsoleRE=/\b(consola|console)\b.*\b(playstation|ps5|ps4|xbox)\b|\b(playstation|ps5|ps4|xbox)\b.*\b(consola|console)\b/i;
+ const accessoryRE=/\b(ventaris|controller|controler|gamepad|volan|pedal|pedale|thrustmaster|husa|case|cablu|cable|incarcator|charger|suport|stand|folie|casti|headset|skin|adaptor|adapter|dock|baterie|remote|telecomanda)\b/i;
+ const gameRE=/\b(joc|game|games|vr|rush of blood|hogwarts|lego|fifa|fc 2[0-9]|call of duty|spider-man|spiderman)\b/i;
  const score=p=>{const t=norm(p.title),b=blob(p);let s=0;
    if(t===raw)s+=100;
    if(t.includes(raw)&&raw.length>2)s+=35;
    s+=terms.reduce((n,x)=>n+(t.includes(x)?10:b.includes(x)?2:0),0);
    const hits=terms.filter(x=>t.includes(x)).length;if(terms.length>1&&hits===terms.length)s+=18;
-   if(wantsConsole){if(consoleRE.test(t))s+=40;if(gameRE.test(t))s-=45;if(accessoryRE.test(t))s-=18}
+   if(wantsConsole){
+     if(realConsoleRE.test(t))s+=160;
+     if(accessoryRE.test(t))s-=100;
+     if(gameRE.test(t))s-=120;
+     if(/\b(pentru|compatibil|compatible)\b/i.test(t) && !realConsoleRE.test(t))s-=55;
+   }
    return s};
  let r=products.filter(p=>score(p)>0);
  const seen=new Set();r=r.filter(p=>{const k=norm(p.title).replace(/[^a-z0-9]+/g," ").trim();if(seen.has(k))return false;seen.add(k);return true});
- if(state.poison==="cheapest")r.sort((a,b)=>{if(wantsConsole){let ac=consoleRE.test(norm(a.title))&&!gameRE.test(norm(a.title)),bc=consoleRE.test(norm(b.title))&&!gameRE.test(norm(b.title));if(ac!==bc)return bc-ac}return a.price-b.price});
+ if(state.poison==="cheapest")r.sort((a,b)=>{
+   if(wantsConsole){const ac=realConsoleRE.test(norm(a.title)),bc=realConsoleRE.test(norm(b.title));if(ac!==bc)return bc-ac}
+   return a.price-b.price
+ });
  else r.sort((a,b)=>score(b)-score(a)||a.price-b.price);
  return r.slice(0,10)
 }
