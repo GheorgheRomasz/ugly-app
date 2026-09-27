@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Ugly App — One Search. Multiple Stores.</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #0b0d12;
+      color: white;
+    }
+
+    nav {
+      max-width: 1100px;
+      margin: auto;
+      padding: 25px 24px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .hero {
+      max-width: 850px;
+      margin: 100px auto 70px;
+      padding: 0 24px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: clamp(42px, 7vw, 72px);
+      margin-bottom: 18px;
+    }
+
+    .gradient {
+      background: linear-gradient(90deg, #7c5cff, #23c9ff);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .subtitle {
+      color: #a9b0bd;
+      font-size: 20px;
+      line-height: 1.6;
+      max-width: 650px;
+      margin: auto;
+    }
+
+    .search-box {
+      margin: 45px auto 25px;
+      max-width: 680px;
+      display: flex;
+      background: #171a22;
+      border: 1px solid #303541;
+      border-radius: 16px;
+      padding: 8px;
+    }
+
+    .search-box input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: white;
+      padding: 16px;
+      font-size: 17px;
+    }
+
+    .search-box button {
+      border: none;
+      border-radius: 11px;
+      padding: 0 24px;
+      background: #7657ff;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .options {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 25px;
+    }
+
+    .option {
+      background: #151821;
+      border: 1px solid #2b303c;
+      padding: 12px 18px;
+      border-radius: 30px;
+      color: #c7ccd6;
+    }
+
+    .cards {
+      max-width: 950px;
+      margin: 80px auto;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #14171f;
+      border: 1px solid #292e39;
+      border-radius: 18px;
+      padding: 28px;
+    }
+
+    .card h3 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    .card p {
+      color: #9fa6b3;
+      line-height: 1.6;
+    }
+
+    .status {
+      max-width: 800px;
+      margin: 60px auto;
+      padding: 30px 24px;
+      text-align: center;
+      color: #9fa6b3;
+    }
+
+    footer {
+      border-top: 1px solid #222630;
+      text-align: center;
+      color: #737b89;
+      padding: 30px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    UGLY<span class="gradient">APP</span>
+  </nav>
+
+  <main>
+
+    <section class="hero">
+
+      <h1>
+        One search.<br>
+        <span class="gradient">Multiple stores.</span>
+      </h1>
+
+      <p class="subtitle">
+        Tell us what you need. Ugly App is being built to search
+        products across multiple online retailers, compare offers,
+        and help you find the right place to buy.
+      </p>
+
+      <div class="search-box">
+        <input
+          type="text"
+          placeholder="What are you looking for?"
+          disabled
+        >
+        <button disabled>Search</button>
+      </div>
+
+      <div class="options">
+        <div class="option">💰 Cheapest</div>
+        <div class="option">⚡ Fastest</div>
+        <div class="option">⭐ Quality</div>
+        <div class="option">⚖️ Balanced</div>
+      </div>
+
+    </section>
+
+    <section class="cards">
+
+      <div class="card">
+        <h3>🔎 Search once</h3>
+        <p>
+          Search for what you need without opening multiple
+          shopping apps and websites.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>⚖️ Compare offers</h3>
+        <p>
+          Compare products and offers from participating
+          online retailers in one place.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>🛒 Buy from the retailer</h3>
+        <p>
+          Choose an offer and continue to the retailer
+          to complete your purchase.
+        </p>
+      </div>
+
+    </section>
+
+    <section class="status">
+      <h2>Currently in development 🛠️</h2>
+
+      <p>
+        Ugly App is an early-stage product discovery and price
+        comparison project. Retailer integrations and product
+        data sources are currently being evaluated.
+      </p>
+
+      <p>
+        Some retailer links may eventually be affiliate links,
+        meaning Ugly App may receive a commission from qualifying
+        purchases at no additional cost to the customer.
+      </p>
+    </section>
+
+  </main>
+
+  <footer>
+    © 2026 Ugly App — Prototype
+  </footer>
+
+</body>
+</html>
