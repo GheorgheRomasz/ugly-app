@@ -1,236 +1,492 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ro">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Ugly App — One Search. Multiple Stores.</title>
+<title>Ugly — Find the deal. Skip the nonsense.</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #0b1020;
+    color: #f4f4f7;
+}
+
+header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(11,16,32,.96);
+    border-bottom: 1px solid #252b3b;
+}
+
+.nav {
+    max-width: 1250px;
+    margin: auto;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.logo span {
+    color: #8b5cf6;
+}
+
+.tag {
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+.hero {
+    max-width: 1250px;
+    margin: auto;
+    padding: 70px 24px 40px;
+}
+
+.hero h1 {
+    margin: 0;
+    max-width: 800px;
+    font-size: clamp(38px, 6vw, 72px);
+    line-height: .98;
+    letter-spacing: -3px;
+}
+
+.hero h1 span {
+    color: #8b5cf6;
+}
+
+.hero p {
+    color: #aab0c0;
+    font-size: 18px;
+    max-width: 650px;
+    line-height: 1.6;
+}
+
+.controls {
+    max-width: 1250px;
+    margin: auto;
+    padding: 0 24px 30px;
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 12px;
+}
+
+input, select {
+    width: 100%;
+    border: 1px solid #30384c;
+    background: #111827;
+    color: white;
+    padding: 15px 17px;
+    border-radius: 12px;
+    font-size: 15px;
+    outline: none;
+}
+
+input:focus, select:focus {
+    border-color: #8b5cf6;
+}
+
+.status {
+    max-width: 1250px;
+    margin: auto;
+    padding: 0 24px 15px;
+    color: #858da0;
+    font-size: 14px;
+}
+
+.products {
+    max-width: 1250px;
+    margin: auto;
+    padding: 0 24px 70px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+}
+
+.card {
+    background: #121827;
+    border: 1px solid #252d40;
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: .2s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    border-color: #6541c7;
+}
+
+.image {
+    height: 220px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+}
+
+.image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.content {
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.store {
+    color: #9b7cff;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.title {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: 10px;
+}
+
+.description {
+    color: #9098aa;
+    font-size: 13px;
+    line-height: 1.45;
+    margin-bottom: 18px;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.bottom {
+    margin-top: auto;
+}
+
+.price {
+    font-size: 23px;
+    font-weight: 900;
+    margin-bottom: 13px;
+}
+
+.button {
+    display: block;
+    text-decoration: none;
+    text-align: center;
+    color: white;
+    background: #7c3aed;
+    padding: 13px;
+    border-radius: 10px;
+    font-weight: 800;
+    transition: .2s;
+}
+
+.button:hover {
+    background: #8b5cf6;
+}
+
+.disclosure {
+    max-width: 1250px;
+    margin: auto;
+    padding: 0 24px 50px;
+    color: #71798c;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #9299a8;
+    padding: 70px 20px;
+}
+
+@media(max-width: 1000px) {
+    .products {
+        grid-template-columns: repeat(3,1fr);
+    }
+}
+
+@media(max-width: 750px) {
+    .products {
+        grid-template-columns: repeat(2,1fr);
     }
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: Arial, sans-serif;
-      background: #0b0d12;
-      color: white;
+    .controls {
+        grid-template-columns: 1fr;
     }
 
-    nav {
-      max-width: 1100px;
-      margin: auto;
-      padding: 25px 24px;
-      font-size: 22px;
-      font-weight: bold;
+    .tag {
+        display: none;
+    }
+}
+
+@media(max-width: 500px) {
+    .products {
+        grid-template-columns: 1fr;
     }
 
     .hero {
-      max-width: 850px;
-      margin: 100px auto 70px;
-      padding: 0 24px;
-      text-align: center;
+        padding-top: 45px;
     }
-
-    h1 {
-      font-size: clamp(42px, 7vw, 72px);
-      margin-bottom: 18px;
-    }
-
-    .gradient {
-      background: linear-gradient(90deg, #7c5cff, #23c9ff);
-      -webkit-background-clip: text;
-      color: transparent;
-    }
-
-    .subtitle {
-      color: #a9b0bd;
-      font-size: 20px;
-      line-height: 1.6;
-      max-width: 650px;
-      margin: auto;
-    }
-
-    .search-box {
-      margin: 45px auto 25px;
-      max-width: 680px;
-      display: flex;
-      background: #171a22;
-      border: 1px solid #303541;
-      border-radius: 16px;
-      padding: 8px;
-    }
-
-    .search-box input {
-      flex: 1;
-      border: none;
-      outline: none;
-      background: transparent;
-      color: white;
-      padding: 16px;
-      font-size: 17px;
-    }
-
-    .search-box button {
-      border: none;
-      border-radius: 11px;
-      padding: 0 24px;
-      background: #7657ff;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .options {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 25px;
-    }
-
-    .option {
-      background: #151821;
-      border: 1px solid #2b303c;
-      padding: 12px 18px;
-      border-radius: 30px;
-      color: #c7ccd6;
-    }
-
-    .cards {
-      max-width: 950px;
-      margin: 80px auto;
-      padding: 0 24px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
-    }
-
-    .card {
-      background: #14171f;
-      border: 1px solid #292e39;
-      border-radius: 18px;
-      padding: 28px;
-    }
-
-    .card h3 {
-      margin-top: 0;
-      font-size: 20px;
-    }
-
-    .card p {
-      color: #9fa6b3;
-      line-height: 1.6;
-    }
-
-    .status {
-      max-width: 800px;
-      margin: 60px auto;
-      padding: 30px 24px;
-      text-align: center;
-      color: #9fa6b3;
-    }
-
-    footer {
-      border-top: 1px solid #222630;
-      text-align: center;
-      color: #737b89;
-      padding: 30px;
-      font-size: 14px;
-    }
-  </style>
+}
+</style>
 </head>
 
 <body>
 
-  <nav>
-    UGLY<span class="gradient">APP</span>
-  </nav>
+<header>
+    <div class="nav">
+        <div class="logo">UG<span>LY</span></div>
+        <div class="tag">Find the deal. Skip the nonsense.</div>
+    </div>
+</header>
 
-  <main>
+<section class="hero">
+    <h1>Shopping shouldn't be <span>pretty.</span><br>It should be useful.</h1>
 
-    <section class="hero">
+    <p>
+        Search products, compare prices and jump straight to the deal.
+        No twenty-tab shopping expedition required.
+    </p>
+</section>
 
-      <h1>
-        One search.<br>
-        <span class="gradient">Multiple stores.</span>
-      </h1>
+<section class="controls">
+    <input
+        id="search"
+        type="search"
+        placeholder="Search PlayStation, Xbox, Nintendo..."
+    >
 
-      <p class="subtitle">
-        Tell us what you need. Ugly App is being built to search
-        products across multiple online retailers, compare offers,
-        and help you find the right place to buy.
-      </p>
+    <select id="sort">
+        <option value="default">Sort products</option>
+        <option value="low">Price: low to high</option>
+        <option value="high">Price: high to low</option>
+        <option value="az">Name: A–Z</option>
+    </select>
+</section>
 
-      <div class="search-box">
-        <input
-          type="text"
-          placeholder="What are you looking for?"
-          disabled
-        >
-        <button disabled>Search</button>
-      </div>
+<div class="status" id="status"></div>
 
-      <div class="options">
-        <div class="option">💰 Cheapest</div>
-        <div class="option">⚡ Fastest</div>
-        <div class="option">⭐ Quality</div>
-        <div class="option">⚖️ Balanced</div>
-      </div>
+<main class="products" id="products"></main>
 
-    </section>
+<div class="disclosure">
+    Some links on Ugly are affiliate links. If you buy through one of
+    these links, Ugly may receive a commission from the merchant.
+</div>
 
-    <section class="cards">
+<script>
 
-      <div class="card">
-        <h3>🔎 Search once</h3>
-        <p>
-          Search for what you need without opening multiple
-          shopping apps and websites.
-        </p>
-      </div>
+const products = [
+{
+title:`Consola Portabila Serioux SRX-PGC200-BL, Ecran 2.7inch, 200 jocuri incluse (Albastru)`,
+price:107.99,
+image:`https://static2.evomag.ro/img?extend=white&file=products%2F1450%2F1450466%2F1473686160consola.jpg&type=auto&width=500&sign=mqiNIfgAUi2RfVBRj8KSVgjFLsUpUlGuUmg5XKTbXeY`,
+description:`Procesor Sunplus, ecran 2.7 inch, rezoluție 960 × 240, 200 jocuri incluse.`,
+link:`https://event.2performant.com/events/click?ad_type=product_store&unique=d0e392fbc&aff_code=6e98a1cde&campaign_unique=d4f678b43`
+},
 
-      <div class="card">
-        <h3>⚖️ Compare offers</h3>
-        <p>
-          Compare products and offers from participating
-          online retailers in one place.
-        </p>
-      </div>
+{
+title:`Consola Microsoft Xbox Series S 512GB, 1 controller (Alb)`,
+price:2499.99,
+image:`https://static2.evomag.ro/img?extend=white&file=products%2F3825%2F3825402%2Fconsola-microsoft-xbox-series-615300e2c40c6.jpg&type=auto&width=500&sign=LwqWqCXI18pywRClMRJr25tdYVsPAqZvLGDGCTJREYM`,
+description:`Xbox Series S cu SSD 512GB, AMD Ryzen Zen 2, RDNA 2 și controller wireless.`,
+link:`https://event.2performant.com/events/click?ad_type=product_store&unique=5cde09c2d&aff_code=6e98a1cde&campaign_unique=d4f678b43`
+},
 
-      <div class="card">
-        <h3>🛒 Buy from the retailer</h3>
-        <p>
-          Choose an offer and continue to the retailer
-          to complete your purchase.
-        </p>
-      </div>
+{
+title:`Consola OLED Nintendo Switch, 64GB (Alb)`,
+price:1949.99,
+image:`https://static2.evomag.ro/img?extend=white&file=products%2F3911%2F3911479%2Fconsola-switch-oled-64gb-alb-626a939c8a24b.JPG&type=auto&width=500&sign=rJL0lYa4RNMtpjkGVPiVB2_yXk-gdd8POsp9Joedot4`,
+description:`Nintendo Switch cu display OLED de 7 inch și memorie internă de 64GB.`,
+link:`https://event.2performant.com/events/click?ad_type=product_store&unique=50a0a2298&aff_code=6e98a1cde&campaign_unique=d4f678b43`
+},
 
-    </section>
+{
+title:`Consola OLED Nintendo Switch Neon, 64GB (Albastru/Rosu)`,
+price:1949.99,
+image:`https://static2.evomag.ro/img?extend=white&file=products%2F3911%2F3911477%2Fconsola-switch-oled-64gb-neon-626a8fb511bf6.JPG&type=auto&width=500&sign=lBsFf5IxUqibDRNMHCbFDVnp-BCleNjQm6GhJQDmAMs`,
+description:`Nintendo Switch OLED 7 inch, 64GB, cu Joy-Con albastru și roșu.`,
+link:`https://event.2performant.com/events/click?ad_type=product_store&unique=a49fb7590&aff_code=6e98a1cde&campaign_unique=d4f678b43`
+},
 
-    <section class="status">
-      <h2>Currently in development 🛠️</h2>
+{
+title:`Sony PlayStation 5 Slim (PS5) D-Chassis, 1TB, Disc Edition`,
+price:3699.99,
+image:`https://static2.evomag.ro/img?extend=white&file=products%2F4132%2F4132385%2Fconsola-sony-playstation-5-sli-65782cbb9a24f.JPG&type=auto&width=500&sign=nQMA0WHMeaWCe-uKNKzvN-rfxFx9U_80exYPDeQpZgI`,
+description:`PlayStation 5 Slim Disc Edition cu SSD 1TB, grafică AMD RDNA 2 și suport 4K.`,
+link:`https://event.2performant.com/events/click?ad_type=product_store&unique=eb9a8940c&aff_code=6e98a1cde&campaign_unique=d4f678b43`
+},
 
-      <p>
-        Ugly App is an early-stage product discovery and price
-        comparison project. Retailer integrations and product
-        data sources are currently being evaluated.
-      </p>
+{
+title:`Sony PlayStation Portal Remote Player pentru PlayStation 5`,
+price:1299.99,
+image:`https://static2.evomag.ro/img?extend=white&file=products%2F4150%2F4150276%2Fsony-playstation-portal-remote-6602b0521fd31.jpg&type=auto&width=500&sign=iSv2m9rT_beAdr0Om8RrbHgSkkyWOwGJJK95xwhLuC8`,
+description:`Remote Player pentru PS5 cu display LCD de 8 inch, 1080p și Wi-Fi.`,
+link:`https://event.2performant.com/events/click?ad_type=product_store&unique=c1771e8b7&aff_code=6e98a1cde&campaign_unique=d4f678b43`
+},
 
-      <p>
-        Some retailer links may eventually be affiliate links,
-        meaning Ugly App may receive a commission from qualifying
-        purchases at no additional cost to the customer.
-      </p>
-    </section>
+{
+title:`LEGO City Undercover pentru Nintendo Switch`,
+price:110.99,
+image:`https://static2.evomag.ro/img?extend=white&file=products%2F4154%2F4154920%2F662760db4d7b4.jpg&type=auto&width=500&sign=Qz5D5VKsX3tPnN0PimvH4ae4x8sJCvRu0z3X_HGqnSA`,
+description:`LEGO City Undercover pentru Nintendo Switch. Action/Adventure, PEGI 7.`,
+link:`https://event.2performant.com/events/click?ad_type=product_store&unique=e67eb4aab&aff_code=6e98a1cde&campaign_unique=d4f678b43`
+},
 
-  </main>
+{
+title:`LEGO Harry Potter Collection pentru Nintendo Switch`,
+price:116.99,
+image:`https://static2.evomag.ro/img?extend=white&file=products%2F4154%2F4154922%2F662760e182ff4.jpg&type=auto&width=500&sign=4xRCkeNn1VQbTVQjYtGr2MxnXS0kVZ2orLW_EOILq2I`,
+description:`LEGO Harry Potter Collection pentru Nintendo Switch. Action/Adventure, PEGI 7.`,
+link:`https://event.2performant.com/events/click?ad_type=product_store&unique=3f250f5e5&aff_code=6e98a1cde&campaign_unique=d4f678b43`
+},
 
-  <footer>
-    © 2026 Ugly App — Prototype
-  </footer>
+{
+title:`LEGO Ninjago Movie pentru Nintendo Switch`,
+price:116.99,
+image:`https://static2.evomag.ro/img?extend=white&file=products%2F4154%2F4154924%2F662760e7875e3.jpg&type=auto&width=500&sign=I0fL501_EQjzMoVkUAT08e2YrgtHIPHRTXtiOA9P7r0`,
+description:`LEGO Ninjago Movie pentru Nintendo Switch. Joc action, PEGI 7.`,
+link:`https://event.2performant.com/events/click?ad_type=product_store&unique=caf186153&aff_code=6e98a1cde&campaign_unique=d4f678b43`
+},
+
+{
+title:`Hogwarts Legacy pentru PlayStation 4`,
+price:117.99,
+image:`https://static2.evomag.ro/img?extend=white&file=products%2F4154%2F4154931%2F66276089446b3.jpg&type=auto&width=500&sign=OVxn6G-BHinjFL5HflZaEsqe6nvd6rDwQltFWZFLTx0`,
+description:`Hogwarts Legacy pentru PlayStation 4. RPG, PEGI 16.`,
+link:`https://event.2performant.com/events/click?ad_type=product_store&unique=9c033b586&aff_code=6e98a1cde&campaign_unique=d4f678b43`
+},
+
+{
+title:`LEGO Star Wars The Skywalker Saga pentru PlayStation 4`,
+price:116.99,
+image:`https://static2.evomag.ro/img?extend=white&file=products%2F4154%2F4154946%2F6627608ea2d11.jpg&type=auto&width=500&sign=DJmRx9nUzh69r0mJrzMMaXMgU642ELvDGJrudhS3qpQ`,
+description:`LEGO Star Wars: The Skywalker Saga pentru PlayStation 4. Action/Adventure.`,
+link:`https://event.2performant.com/events/click?ad_type=product_store&unique=ee160b534&aff_code=6e98a1cde&campaign_unique=d4f678b43`
+},
+
+{
+title:`Prince of Persia The Lost Crown pentru PlayStation 4`,
+price:117.99,
+image:`https://static2.evomag.ro/img?extend=white&file=products%2F4154%2F4154970%2F662760c93038d.jpg&type=auto&width=500&sign=zie2ovftlb6nPOhSUyoMm21RgEkbrEI-0tgF4bso28Y`,
+description:`Prince of Persia: The Lost Crown pentru PlayStation 4. Action/Adventure, PEGI 16.`,
+link:`https://event.2performant.com/events/click?ad_type=product_store&unique=2f1ba69f3&aff_code=6e98a1cde&campaign_unique=d4f678b43`
+}
+];
+
+const container = document.getElementById("products");
+const search = document.getElementById("search");
+const sort = document.getElementById("sort");
+const status = document.getElementById("status");
+
+function money(value) {
+    return new Intl.NumberFormat("ro-RO", {
+        style: "currency",
+        currency: "RON"
+    }).format(value);
+}
+
+function render() {
+
+    const query = search.value.toLowerCase().trim();
+
+    let result = products.filter(product =>
+        product.title.toLowerCase().includes(query) ||
+        product.description.toLowerCase().includes(query)
+    );
+
+    if (sort.value === "low")
+        result.sort((a,b) => a.price - b.price);
+
+    if (sort.value === "high")
+        result.sort((a,b) => b.price - a.price);
+
+    if (sort.value === "az")
+        result.sort((a,b) => a.title.localeCompare(b.title));
+
+    status.textContent =
+        `${result.length} product${result.length === 1 ? "" : "s"} found`;
+
+    if (!result.length) {
+        container.innerHTML =
+            `<div class="empty">No ugly deals found. Try another search. 👀</div>`;
+        return;
+    }
+
+    container.innerHTML = result.map(product => `
+        <article class="card">
+
+            <div class="image">
+                <img
+                    src="${product.image}"
+                    alt="${product.title}"
+                    loading="lazy"
+                >
+            </div>
+
+            <div class="content">
+
+                <div class="store">evoMAG.ro</div>
+
+                <div class="title">
+                    ${product.title}
+                </div>
+
+                <div class="description">
+                    ${product.description}
+                </div>
+
+                <div class="bottom">
+
+                    <div class="price">
+                        ${money(product.price)}
+                    </div>
+
+                    <a
+                        class="button"
+                        href="${product.link}"
+                        target="_blank"
+                        rel="nofollow sponsored noopener"
+                    >
+                        See deal →
+                    </a>
+
+                </div>
+            </div>
+
+        </article>
+    `).join("");
+}
+
+search.addEventListener("input", render);
+sort.addEventListener("change", render);
+
+render();
+
+</script>
 
 </body>
 </html>
