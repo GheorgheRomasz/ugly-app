@@ -149,7 +149,10 @@ function find(){
    if(tvIntent) return tvRE.test(t) && !tvAccessoryRE.test(t) && (!wantsSamsung || /\bsamsung\b/i.test(t)) && (!cheapCut || price>=cheapCut);
    if(iphoneIntent) return /\biphone\b/i.test(t) && iphoneModelRE.test(t) && !iphoneAccessoryRE.test(t) && (!cheapCut || price>=cheapCut);
    if(consoleIntent){
-     if(/^nintendo|^switch/i.test(raw)) return /\b(nintendo|switch)\b/i.test(t) && !gameRE.test(t) && !accessoryRE.test(t) && (!cheapCut || price>=cheapCut);
+     if(/^nintendo|^switch/i.test(raw)){
+       const nintendoConsoleRE=/\b(consola|console)\b.*\b(nintendo|switch)\b|\b(nintendo|switch)\b.*\b(consola|console)\b|^(nintendo\s+)?switch\s*(oled|lite|2|console|consola|$)/i;
+       return nintendoConsoleRE.test(t) && !gameRE.test(t) && !accessoryRE.test(t) && (!cheapCut || price>=cheapCut);
+     }
      if(/play ?station|ps ?[45]/i.test(raw)) return /\b(playstation|ps5|ps4)\b/i.test(t) && !gameRE.test(t) && !accessoryRE.test(t) && (!cheapCut || price>=cheapCut);
      if(/xbox/i.test(raw)) return /\bxbox\b/i.test(t) && !gameRE.test(t) && !accessoryRE.test(t) && (!cheapCut || price>=cheapCut);
    }
