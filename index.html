@@ -79,10 +79,16 @@ h2{font-size:24px;margin:19px 4px 8px}p.help{color:#b8bec9;margin:0 4px 22px;fon
 let products = [];
 let productsLoaded = false;
 let productsLoadError = null;
-const productsReady = fetch("products.json", {cache:"no-store"})
-  .then(r=>{if(!r.ok) throw new Error(`products.json HTTP ${r.status}`); return r.json()})
-  .then(data=>{products = Array.isArray(data) ? data : (Array.isArray(data.products) ? data.products : []); productsLoaded=true; return products;})
-  .catch(err=>{productsLoadError=err; productsLoaded=true; console.error("UGLY product feed failed to load:",err); return products;});
+const productsReady = Promise.all([
+  fetch("products-1.json", {cache:"no-store"}),
+  fetch("products-2.json", {cache:"no-store"})
+])
+  .then(async responses => {
+    for (const r of responses) if (!r.ok) throw new Error(`${r.url} HTTP ${r.status}`);
+    return (await Promise.all(responses.map(r => r.json()))).flat();
+  })
+  .then(data=>{products = data; productsLoaded=true; return products;})
+  .catch(err=>{productsLoadError=err; productsLoaded=true; console.error("UGLY product feed failed:", err); return [];});
 
 let state={q:"headphones",condition:"new",poison:"best"};
 function show(id){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("on"));document.getElementById(id).classList.add("on");window.scrollTo(0,0)}
