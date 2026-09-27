@@ -104,32 +104,66 @@ function norm(s){return (s||"").toLowerCase().normalize("NFD").replace(/[\u0300-
 function blob(p){return norm(p.title+" "+(p.description||"")+" "+(p.merchant||""))}
 function find(){
  const raw=norm(state.q).trim(), compact=raw.replace(/\s+/g,"");
- const aliases={"playstation":["playstation","ps5","ps4"],"play station":["playstation","ps5","ps4"],"xbox":["xbox"],"iphone":["iphone"]};
- const terms=(aliases[raw]||aliases[compact]||raw.split(/\s+/)).filter(Boolean);
- const wantsConsole=["playstation","play station","ps5","ps4","xbox"].includes(raw)||["playstation","ps5","ps4","xbox"].includes(compact);
- const realConsoleRE=/\b(consola|console)\b.*\b(playstation|ps5|ps4|xbox)\b|\b(playstation|ps5|ps4|xbox)\b.*\b(consola|console)\b/i;
- const accessoryRE=/\b(ventaris|controller|controler|gamepad|volan|pedal|pedale|thrustmaster|husa|case|cablu|cable|incarcator|charger|suport|stand|folie|casti|headset|skin|adaptor|adapter|dock|baterie|remote|telecomanda)\b/i;
- const gameRE=/\b(joc|game|games|vr|rush of blood|hogwarts|lego|fifa|fc 2[0-9]|call of duty|spider-man|spiderman)\b/i;
- const score=p=>{const t=norm(p.title),b=blob(p);let s=0;
-   if(t===raw)s+=100;
-   if(t.includes(raw)&&raw.length>2)s+=35;
-   s+=terms.reduce((n,x)=>n+(t.includes(x)?10:b.includes(x)?2:0),0);
-   const hits=terms.filter(x=>t.includes(x)).length;if(terms.length>1&&hits===terms.length)s+=18;
-   if(wantsConsole){
-     if(realConsoleRE.test(t))s+=160;
-     if(accessoryRE.test(t))s-=100;
-     if(gameRE.test(t))s-=120;
-     if(/\b(pentru|compatibil|compatible)\b/i.test(t) && !realConsoleRE.test(t))s-=55;
+ const words=raw.split(/\s+/).filter(x=>x.length>1);
+ const aliases={
+   "playstation":["playstation","ps5","ps4"],"play station":["playstation","ps5","ps4"],
+   "ps 5":["ps5","playstation 5"],"ps5":["ps5","playstation 5"],
+   "ps 4":["ps4","playstation 4"],"ps4":["ps4","playstation 4"],
+   "xbox":["xbox"],"iphone":["iphone"],"nintendo":["nintendo","switch"],
+   "laptop":["laptop","notebook"],"notebook":["notebook","laptop"]
+ };
+ const terms=(aliases[raw]||aliases[compact]||words).filter(Boolean);
+ const consoleIntent=/^(play ?station|ps ?[45]|xbox|nintendo|nintendo switch|switch)$/i.test(raw);
+ const laptopIntent=/^(laptop|notebook|laptopuri|notebookuri)$/i.test(raw);
+ const tvIntent=/(^|\s)(tv|televizor|television)(\s|$)/i.test(raw);
+ const wantsSamsung=/(^|\s)samsung(\s|$)/i.test(raw);
+
+ const consoleRE=/\b(consola|console)\b/i;
+ const consoleBrandRE=/\b(playstation|ps5|ps4|xbox|nintendo|switch)\b/i;
+ const accessoryRE=/\b(ventaris|controller|controler|gamepad|volan|pedal|pedale|thrustmaster|husa|case|cablu|cable|incarcator|charger|suport|stand|folie|casti|headset|skin|adaptor|adapter|dock|baterie|remote|telecomanda|mount|rucsac|geanta|cooler|lampa)\b/i;
+ const gameRE=/\b(joc|game|games|rush of blood|hogwarts|lego|fifa|fc 2[0-9]|call of duty|spider-man|spiderman|ninjago|undercover)\b/i;
+ const laptopRE=/\b(laptop|notebook)\b/i;
+ const laptopAccessoryRE=/\b(husa|case|rucsac|geanta|cooler|stand|suport|lampa|incarcator|charger|baterie|dock|adaptor|adapter|mouse|tastatura|keyboard)\b/i;
+ const tvRE=/\b(tv|televizor|television|smart tv|qled|oled|neo qled)\b/i;
+ const tvAccessoryRE=/\b(telecomanda|remote|wall mount|suport|stand|husa|cablu|cable|adaptor|adapter)\b/i;
+
+ const score=p=>{
+   const t=norm(p.title), b=blob(p); let s=0;
+   if(t===raw)s+=120;
+   if(raw.length>2&&t.includes(raw))s+=45;
+   for(const x of terms){if(t.includes(x))s+=14;else if(b.includes(x))s+=3}
+   const hits=words.filter(x=>t.includes(x)).length;
+   if(words.length>1&&hits===words.length)s+=35;
+
+   if(consoleIntent){
+     if(consoleRE.test(t)&&consoleBrandRE.test(t))s+=190;
+     else if(consoleBrandRE.test(t))s+=25;
+     if(accessoryRE.test(t))s-=130;
+     if(gameRE.test(t))s-=150;
+     if(/\b(pentru|compatibil|compatible)\b/i.test(t)&&!consoleRE.test(t))s-=70;
    }
-   return s};
- let r=products.filter(p=>score(p)>0);
- const seen=new Set();r=r.filter(p=>{const k=norm(p.title).replace(/[^a-z0-9]+/g," ").trim();if(seen.has(k))return false;seen.add(k);return true});
- if(state.poison==="cheapest")r.sort((a,b)=>{
-   if(wantsConsole){const ac=realConsoleRE.test(norm(a.title)),bc=realConsoleRE.test(norm(b.title));if(ac!==bc)return bc-ac}
-   return a.price-b.price
+   if(laptopIntent){
+     if(laptopRE.test(t)&&!laptopAccessoryRE.test(t))s+=200;
+     if(laptopAccessoryRE.test(t))s-=170;
+     if(!laptopRE.test(t))s-=45;
+   }
+   if(tvIntent){
+     if(tvRE.test(t)&&!tvAccessoryRE.test(t))s+=200;
+     if(tvAccessoryRE.test(t))s-=180;
+     if(wantsSamsung){if(/\bsamsung\b/i.test(t))s+=90;else s-=70}
+   }
+   return s;
+ };
+
+ let r=products.map(p=>({p,s:score(p)})).filter(x=>x.s>0);
+ const seen=new Set();
+ r=r.filter(x=>{const k=norm(x.p.title).replace(/[^a-z0-9]+/g," ").trim();if(seen.has(k))return false;seen.add(k);return true});
+ if(state.poison==="cheapest") r.sort((a,b)=>{
+   const intent=x=>consoleIntent?(consoleRE.test(norm(x.p.title))&&consoleBrandRE.test(norm(x.p.title))):laptopIntent?(laptopRE.test(norm(x.p.title))&&!laptopAccessoryRE.test(norm(x.p.title))):tvIntent?(tvRE.test(norm(x.p.title))&&!tvAccessoryRE.test(norm(x.p.title))):true;
+   const ai=intent(a),bi=intent(b); if(ai!==bi)return bi-ai; return a.p.price-b.p.price;
  });
- else r.sort((a,b)=>score(b)-score(a)||a.price-b.price);
- return r.slice(0,10)
+ else r.sort((a,b)=>b.s-a.s||a.p.price-b.p.price);
+ return r.slice(0,10).map(x=>x.p)
 }
 function ron(v){return new Intl.NumberFormat("ro-RO",{minimumFractionDigits:2,maximumFractionDigits:2}).format(v)+" RON"}
 document.getElementById("searchNow").onclick=async()=>{await productsReady;let r=find();document.getElementById("scribble").textContent=state.q;let pp=document.getElementById("poisonPill");pp.textContent=state.poison==="cheapest"?"💰 CHEAPEST":state.poison==="fastest"?"ϟ FASTEST":"🔥 BEST DEAL";document.getElementById("list").innerHTML=r.length?r.map((p,i)=>`<article class="product"><div class="rank">#${i+1}</div><img src="${p.image}" alt=""><div><div class="ptitle">${p.title}</div><div class="merchant">${p.merchant || "Merchant"} · NEW</div><div class="price">${ron(p.price)}</div><a class="deal" href="${p.link}" target="_blank" rel="nofollow sponsored noopener">View Deal →</a></div></article>`).join(""):`<article class="product"><div><div class="ptitle">No real deals found for “${state.q}”.</div><div class="merchant">Try another product or edit your search.</div></div></article>`;document.getElementById("truth").textContent=state.poison==="fastest"?"Delivery-time information is not supplied by the current product feed, so UGLY does not invent delivery rankings. Products are shown using the available real feed data.":"Live UGLY prototype searching real affiliate products from multiple Romanian merchants. Retailer price and availability may change.";show("results")};
