@@ -6,7 +6,11 @@ UGLY remains a static single-page app. The existing artwork, CSS, screens, ranki
 
 From this folder, run `node serve.cjs`, then open http://127.0.0.1:4173. The server listens only on this computer. No package installation is required.
 
-Run `node --test tests/search.test.cjs` for the regression suite.
+Run `npm test` (or `node --test tests/search.test.cjs tests/ui.test.cjs catalog-import/test/import.test.cjs`) for all 50 dependency-free tests.
+
+For browser regressions, install the development dependency with `npm install`, then install a test browser with `npx playwright install chromium`. Run `npm run test:browser` for the nine checks at 320px, 390px and 1440px, or `npm run test:all` for all 59 tests. An installed Edge browser can be used instead by setting `UGLI_BROWSER_CHANNEL=msedge`. Set `UGLI_SCREENSHOT_DIR` to an output folder to save review screenshots. Browser tests serve the actual frontend locally and intercept external requests with deterministic test responses; they never contact production Typesense or merchant sites. They test UI behavior, not live catalog relevance.
+
+Photo Search / Find This is visible on the home and preference screens and disabled with a Coming Soon label. No image picker, upload or image-search backend is connected. USED remains Coming Soon and is natively disabled; NEW remains the current condition. Clear resets the query and selection and focuses the home search input. Back preserves the query and preference: results return to preferences, and preferences return to the input.
 
 For explicitly labeled local-catalog browser tests, run `node serve.cjs --fixtures` and open http://127.0.0.1:4174. This uses the two local product files to return test responses. It does not simulate Typesense relevance or change the remote index. It is not a fallback in the normal app.
 

@@ -29,6 +29,10 @@ body{min-height:100svh}.app{min-height:100svh;background:#020713;overflow:hidden
 .query-control:focus-visible{outline:2px solid #12aaff;outline-offset:2px;border-radius:4px}
 .scribble{overflow-wrap:anywhere}
 .product .ptitle{overflow-wrap:anywhere}
+.photo-search{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 12px;width:100%;padding:12px;border:1px solid #6454b5;border-radius:11px;background:#0b1428;color:#c6d8ef;font:inherit;font-size:14px;cursor:not-allowed}
+.photo-search small{color:#c4afff;font-size:12px}
+.home-photo{width:min(88%,820px);margin:12px auto 24px}
+.phone .photo-search{margin:-10px 0 22px}
 #heroSearch{left:78.6%;top:38.1%;width:13.2%;height:5.3%}
 #autoHot{left:6%;top:45.2%;width:87%;height:14.3%}
 #homeHot{left:6%;top:60.5%;width:87%;height:14.3%}
@@ -63,16 +67,17 @@ h2{font-size:24px;margin:19px 4px 8px}p.help{color:#b8bec9;margin:0 4px 22px;fon
 <button id="autoHot" class="hot" aria-label="Automotive stuff"></button>
 <button id="homeHot" class="hot" aria-label="House stuff"></button>
 <button id="trendHot" class="hot" aria-label="Trend stuff"></button>
-</div></div></section>
+</div></div><button class="photo-search home-photo" disabled><span>Photo Search / Find This</span><small>Coming Soon</small></button></section>
 
 <section id="choose" class="screen flowbg"><div class="phone">
 <div class="top"><span class="hamb">☰</span><span class="user">◎</span></div>
 <div class="logo"><span class="u">UG</span><span class="b">LY</span><small>.com</small></div>
 <div class="tag">ONE SEARCH. ALL STORES. <b>REAL DEALS.</b></div>
 <div class="querybox"><button id="wizardBack" class="query-control query-back" aria-label="Back to search">←</button><b class="qtxt" tabindex="0" aria-label="Current search query"></b><button id="wizardClear" class="query-control query-clear" aria-label="Clear search">×</button></div>
+<button class="photo-search" disabled><span>Photo Search / Find This</span><small>Coming Soon</small></button>
 <div class="progress"><span class="bubble">1</span><span class="bar"></span><span class="num">1 / 2</span></div>
 <h2>What condition do you want?</h2><p class="help">Choose the type that fits your needs.</p>
-<div class="condition"><button id="newBtn" class="cond active"><span class="ico">✦</span><strong>NEW</strong><small>Brand new products<br>from trusted stores.</small></button><button id="usedBtn" class="cond disabled"><span class="ico">♻</span><strong>USED</strong><small>Coming soon<br>as we add more marketplaces.</small></button></div>
+<div class="condition"><button id="newBtn" class="cond active"><span class="ico">✦</span><strong>NEW</strong><small>Brand new products<br>from trusted stores.</small></button><button id="usedBtn" class="cond disabled" disabled><span class="ico">♻</span><strong>USED</strong><small>Coming soon<br>as we add more marketplaces.</small></button></div>
 <div class="progress"><span class="bubble">2</span><span class="bar"></span><span class="num">2 / 2</span></div>
 <h2>What's your poison?</h2><p class="help">Choose what matters most to you.</p>
 <div class="poison"><button class="pick cheap" data-p="cheapest"><span class="ico">●</span><span><strong>CHEAPEST</strong><small>Show me the lowest prices available.</small></span></button><button class="pick best" data-p="best"><span class="ico">🔥</span><span><strong>BEST DEAL</strong><small>Best balance of price, quality and value.</small></span></button><button class="pick fast" data-p="fastest"><span class="ico">ϟ</span><span><strong>FASTEST DELIVERY</strong><small>Show me options with the quickest delivery.</small></span></button></div>
@@ -159,7 +164,6 @@ document.getElementById("autoHot").onclick=()=>start("automotive");
 document.getElementById("homeHot").onclick=()=>start("home");
 document.getElementById("trendHot").onclick=()=>start("gaming");
 document.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{state.poison=b.dataset.p;document.querySelectorAll("[data-p]").forEach(x=>x.style.filter="brightness(.72)");b.style.filter="brightness(1.2)"});
-document.getElementById("usedBtn").onclick=()=>alert("USED is visually part of UGLY, exactly like the approved render. We will activate it when a legitimate used-product source is connected.");
 function norm(s){return String(s??"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")}
 function blob(p){return norm(p.title+" "+(p.description||"")+" "+(p.merchant||""))}
 function find(){

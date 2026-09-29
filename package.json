@@ -1,0 +1,12 @@
+{
+  "name": "ugli-local-development",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/search.test.cjs tests/ui.test.cjs catalog-import/test/import.test.cjs",
+    "test:browser": "node --test tests/browser.test.cjs",
+    "test:all": "node --test tests/search.test.cjs tests/ui.test.cjs catalog-import/test/import.test.cjs tests/browser.test.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}
